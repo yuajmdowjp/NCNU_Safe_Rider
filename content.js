@@ -5,6 +5,8 @@ console.log("NCNU 交通安全測驗小幫手已載入");
 let isAutoEnabled = false; 
 // 預設開啟「影片自動輔助」
 let isVideoAutoEnabled = true;
+// 預設關閉「影片自動加速 (實驗性功能)」
+let isVideoSpeedEnabled = false;
 
 // 注入懸浮 UI
 function injectUI() {
@@ -46,6 +48,10 @@ function injectUI() {
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span style="font-size: 14px; font-weight: 500;">影片自動輔助 (自動點擊)</span>
                     <input type="checkbox" id="ncnu-video-toggle" style="width: 20px; height: 20px; cursor: pointer;" checked>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;" title="這可以突破進度條無法拖拉的限制，瞬間播完影片。請注意：如果伺服器檢查觀看時間可能會被抓。">
+                    <span style="font-size: 14px; font-weight: 500; color: #fca5a5;">影片自動加速 (最高 16x)</span>
+                    <input type="checkbox" id="ncnu-speed-toggle" style="width: 20px; height: 20px; cursor: pointer;">
                 </div>
             </div>
             
@@ -215,13 +221,14 @@ function injectUI() {
     // 綁定按鈕與開關事件
     const autoToggle = document.getElementById('ncnu-auto-toggle');
     const videoToggle = document.getElementById('ncnu-video-toggle');
+    const speedToggle = document.getElementById('ncnu-speed-toggle');
     const scanBtn = document.getElementById('ncnu-scan-btn');
     const resultArea = document.getElementById('ncnu-result-area');
     const btnText = document.getElementById('ncnu-btn-text');
 
     // 讀取設定 (加入安全檢查，避免開發/除錯時報錯)
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['autoEnabled', 'videoAutoEnabled'], (result) => {
+        chrome.storage.local.get(['autoEnabled', 'videoAutoEnabled', 'videoSpeedEnabled'], (result) => {
             if (result && result.autoEnabled !== undefined) {
                 isAutoEnabled = result.autoEnabled;
             }
@@ -232,12 +239,21 @@ function injectUI() {
                 isVideoAutoEnabled = true;
                 chrome.storage.local.set({ videoAutoEnabled: true });
             }
+            if (result && result.videoSpeedEnabled !== undefined) {
+                isVideoSpeedEnabled = result.videoSpeedEnabled;
+            } else {
+                // 預設加速功能關閉
+                isVideoSpeedEnabled = false;
+                chrome.storage.local.set({ videoSpeedEnabled: false });
+            }
             autoToggle.checked = isAutoEnabled;
             videoToggle.checked = isVideoAutoEnabled;
+            speedToggle.checked = isVideoSpeedEnabled;
         });
     } else {
         autoToggle.checked = isAutoEnabled;
         videoToggle.checked = isVideoAutoEnabled;
+        speedToggle.checked = isVideoSpeedEnabled;
     }
 
     // 自動開關切換
@@ -255,6 +271,14 @@ function injectUI() {
             chrome.storage.local.set({ videoAutoEnabled: isVideoAutoEnabled });
         }
         console.log(`影片自動輔助功能已${isVideoAutoEnabled ? '開啟' : '關閉'}`);
+    });
+
+    speedToggle.addEventListener('change', (e) => {
+        isVideoSpeedEnabled = e.target.checked;
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ videoSpeedEnabled: isVideoSpeedEnabled });
+        }
+        console.log(`影片自動加速功能已${isVideoSpeedEnabled ? '開啟' : '關閉'}`);
     });
 
     // 手動掃描
@@ -394,6 +418,22 @@ function handleH5PVideo() {
                         if (nextLink) nextLink.click();
                     }
                 }
+            }
+            // 步驟 6：影片自動加速 (實驗性功能)
+            if (isVideoSpeedEnabled) {
+                const videos = doc.querySelectorAll('video');
+                videos.forEach(video => {
+                    if (video.playbackRate !== 16) {
+                        video.playbackRate = 16;
+                        console.log('[NCNU 小幫手] 已將影片加速至 16 倍');
+                    }
+                    // 如果影片因為某些原因暫停了，且畫面上沒有需要點擊的氣泡或選項，嘗試自動播放
+                    if (video.paused && !doc.querySelector('.h5p-interaction[role="button"][aria-expanded="true"]') && !doc.querySelector('li.h5p-sc-alternative')) {
+                        video.play().catch(e => {
+                            // 忽略瀏覽器防止自動播放的錯誤
+                        });
+                    }
+                });
             }
         } catch (e) {
             // 忽略跨網域 iframe 讀取錯誤
