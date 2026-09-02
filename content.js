@@ -366,15 +366,32 @@ function handleH5PVideo() {
                              doc.body.textContent.includes('Answers submitted'))) {
                 
                 if (!window._ncnuHelperNextClicked) {
-                    // Moodle 的「下一個活動」連結通常在主畫面的 <a> 標籤，並包含 ► 符號
-                    const nextLinks = document.querySelectorAll('a');
-                    for (let a of nextLinks) {
-                        if (a.textContent && a.textContent.includes('►')) {
-                            console.log('[NCNU 小幫手] 偵測到影片已完成，自動跳轉至下一個活動：', a.textContent.trim());
-                            window._ncnuHelperNextClicked = true;
-                            a.click();
-                            break;
+                    window._ncnuHelperNextClicked = true;
+                    console.log('[NCNU 小幫手] 偵測到影片已完成，準備跳轉至下一個活動...');
+                    
+                    try {
+                        // 因為文字是在 iframe 中偵測到的，跳轉按鈕則是在最上層的 Moodle 主網頁
+                        const topDoc = window.top.document;
+                        const nextLink = topDoc.getElementById('next-activity-link');
+                        if (nextLink) {
+                            console.log('[NCNU 小幫手] 成功找到下一頁按鈕：', nextLink.textContent.trim());
+                            nextLink.click();
+                            return;
                         }
+                        
+                        // 備案：如果沒有 ID，尋找包含 ► 的 <a>
+                        const nextLinks = topDoc.querySelectorAll('a');
+                        for (let a of nextLinks) {
+                            if (a.textContent && a.textContent.includes('►')) {
+                                console.log('[NCNU 小幫手] 成功找到下一頁連結 (備案)：', a.textContent.trim());
+                                a.click();
+                                return;
+                            }
+                        }
+                    } catch(e) {
+                        console.log('[NCNU 小幫手] 無法存取主網頁 DOM，退回在當前視窗尋找');
+                        const nextLink = document.getElementById('next-activity-link');
+                        if (nextLink) nextLink.click();
                     }
                 }
             }
