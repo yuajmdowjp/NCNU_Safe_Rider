@@ -300,25 +300,67 @@ if (document.readyState === 'loading') {
 
 // 模組一：H5P 影片自動點擊與加速 (根據 VIDEO_BYPASS_DOC.md 實作)
 function handleH5PVideo() {
-    // 步驟 1：解除隱藏視窗 (點擊紫色氣泡)
-    const interactionBtns = document.querySelectorAll('.h5p-interaction[role="button"]');
-    interactionBtns.forEach(btn => {
-        const label = btn.querySelector('.h5p-interaction-label-text p');
-        if (label && (label.innerText.includes('是否繼續播放') || label.innerText.includes('是否繼續觀看'))) {
-            if (btn.getAttribute('aria-expanded') === 'false') {
-                btn.click();
-            }
-        }
-    });
+    // Helper function to process a specific document context (main doc or iframe)
+    const processContext = (doc) => {
+        try {
+            // 步驟 1：解除隱藏視窗 (點擊紫色氣泡)
+            const interactionBtns = doc.querySelectorAll('.h5p-interaction[role="button"]');
+            interactionBtns.forEach(btn => {
+                const label = btn.querySelector('.h5p-interaction-label-text p');
+                if (label && (label.textContent.includes('是否繼續播放') || label.textContent.includes('是否繼續觀看'))) {
+                    if (btn.getAttribute('aria-expanded') === 'false') {
+                        btn.click();
+                        console.log('[NCNU 小幫手] 點擊了影片繼續氣泡');
+                    }
+                }
+            });
 
-    // 步驟 2：選取通關選項 (點擊「是」)
-    const h5pOptions = document.querySelectorAll('li.h5p-sc-alternative');
-    h5pOptions.forEach(option => {
-        const textEl = option.querySelector('.h5p-sc-label p');
-        if (textEl && textEl.innerText.trim() === '是') {
-            if (option.getAttribute('aria-checked') !== 'true' && !option.classList.contains('h5p-sc-selected')) {
-                option.click();
+            // 步驟 2：選取通關選項 (點擊「是」)
+            const h5pOptions = doc.querySelectorAll('li.h5p-sc-alternative');
+            h5pOptions.forEach(option => {
+                const textEl = option.querySelector('.h5p-sc-label p') || option.querySelector('.h5p-sc-label');
+                if (textEl && (textEl.textContent.trim() === '是' || textEl.textContent.includes('是'))) {
+                    if (option.getAttribute('aria-checked') !== 'true' && !option.classList.contains('h5p-sc-selected')) {
+                        option.click();
+                        console.log('[NCNU 小幫手] 點擊了「是」選項');
+                    }
+                }
+            });
+
+            // 步驟 3：恢復影片播放 (點擊「繼續」)
+            const continueBtns = doc.querySelectorAll('.h5p-joubelui-button, .h5p-continue-button, button');
+            continueBtns.forEach(btn => {
+                // 如果是特定的 H5P class，或是文字符合
+                const btnText = btn.textContent ? btn.textContent.trim() : '';
+                const isH5PBtn = btn.classList.contains('h5p-joubelui-button') || btn.classList.contains('h5p-continue-button');
+                
+                if (isH5PBtn || btnText === '繼續' || btnText === 'Continue') {
+                    // 確保按鈕在畫面上可見
+                    const rect = btn.getBoundingClientRect();
+                    const isVisible = rect.width > 0 && rect.height > 0 && btn.style.display !== 'none';
+                    if (isVisible) {
+                        btn.click();
+                        console.log('[NCNU 小幫手] 點擊了繼續按鈕');
+                    }
+                }
+            });
+        } catch (e) {
+            // 忽略跨網域 iframe 讀取錯誤
+        }
+    };
+
+    // 處理主網頁
+    processContext(document);
+
+    // 處理 Moodle 中常見的 iframe 包裝
+    const iframes = document.querySelectorAll('iframe');
+    iframes.forEach(iframe => {
+        try {
+            if (iframe.contentDocument) {
+                processContext(iframe.contentDocument);
             }
+        } catch (e) {
+            // 同源政策阻擋時跳過
         }
     });
 
