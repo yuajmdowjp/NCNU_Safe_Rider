@@ -426,14 +426,25 @@ function handleH5PVideo() {
             }
 
             // 步驟 6：影片自動播放與兩倍速
-            // 嘗試點擊 H5P 的初始大播放按鈕
-            const playBtns = doc.querySelectorAll('.h5p-video-play, .h5p-splash-play, .h5p-splash-wrapper, .h5p-play-icon, .h5p-play-button, [aria-label*="Play"], [aria-label*="播放"]');
-            playBtns.forEach(btn => {
-                const rect = btn.getBoundingClientRect();
-                const isVisible = rect.width > 0 && rect.height > 0 && btn.style.display !== 'none' && window.getComputedStyle(btn).opacity !== '0';
-                if (isVisible) {
-                    btn.click();
-                    console.log('[NCNU 小幫手] 點擊了 H5P 初始播放按鈕');
+            // 尋找所有的按鈕，看看有沒有疑似播放鍵的
+            const allBtns = doc.querySelectorAll('button, div, span, a');
+            allBtns.forEach(btn => {
+                const aria = btn.getAttribute('aria-label') || '';
+                const className = btn.className || '';
+                const title = btn.getAttribute('title') || '';
+                if ((typeof className === 'string' && className.toLowerCase().includes('play')) || 
+                    aria.toLowerCase().includes('play') || 
+                    aria.includes('播放') ||
+                    title.toLowerCase().includes('play') ||
+                    title.includes('播放')) {
+                    
+                    const rect = btn.getBoundingClientRect();
+                    const isVisible = rect.width > 0 && rect.height > 0 && btn.style.display !== 'none' && window.getComputedStyle(btn).opacity !== '0';
+                    if (isVisible && !btn.dataset.ncnuPlayClicked) {
+                        btn.dataset.ncnuPlayClicked = 'true';
+                        btn.click();
+                        console.log('[NCNU 小幫手] 點擊了疑似播放鍵的元素:', btn);
+                    }
                 }
             });
 
@@ -448,7 +459,16 @@ function handleH5PVideo() {
                 }
             });
 
-            const ytIframes = doc.querySelectorAll('iframe[src*="youtube.com"], iframe[src*="youtube-nocookie.com"]');
+            // 為了除錯，列出所有 iframe
+            const allIframes = doc.querySelectorAll('iframe');
+            allIframes.forEach(iframe => {
+                if (!iframe.dataset.ncnuLogged) {
+                    iframe.dataset.ncnuLogged = 'true';
+                    console.log('[NCNU 小幫手] 找到 iframe, src=', iframe.src);
+                }
+            });
+
+            const ytIframes = doc.querySelectorAll('iframe[src*="youtube"], iframe[src*="youtu.be"]');
             ytIframes.forEach(iframe => {
                 if (!iframe.dataset.ncnuSpeedHacked) {
                     console.log('[NCNU 小幫手] 找到 YouTube iframe，發送兩倍速指令');
