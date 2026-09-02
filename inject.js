@@ -11,13 +11,13 @@ window.addEventListener('message', function(event) {
                         score: { scaled: 1, raw: 1, min: 0, max: 1 }
                     };
                     instance.trigger(xAPIEvent);
-                    window.postMessage({ type: 'NCNU_HACK_SUCCESS' }, '*');
+                    window.top.postMessage({ type: 'NCNU_HACK_SUCCESS' }, '*');
                 }
             } else {
-                window.postMessage({ type: 'NCNU_HACK_FAIL' }, '*');
+                window.top.postMessage({ type: 'NCNU_HACK_FAIL' }, '*');
             }
         } catch(e) {
-            window.postMessage({ type: 'NCNU_HACK_FAIL', error: e.toString() }, '*');
+            window.top.postMessage({ type: 'NCNU_HACK_FAIL', error: e.toString() }, '*');
         }
     }
 });
