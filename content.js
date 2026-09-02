@@ -266,26 +266,56 @@ if (document.readyState === 'loading') {
     injectUI();
 }
 
-// 模組一：H5P 影片自動點擊
+// 模組一：H5P 影片自動點擊與加速 (根據 VIDEO_BYPASS_DOC.md 實作)
 function handleH5PVideo() {
-    const expandedBubble = document.querySelector('[aria-expanded="true"]');
-    if (!expandedBubble) return;
+    // 步驟 1：解除隱藏視窗 (點擊紫色氣泡)
+    const interactionBtns = document.querySelectorAll('.h5p-interaction[role="button"]');
+    interactionBtns.forEach(btn => {
+        const label = btn.querySelector('.h5p-interaction-label-text p');
+        if (label && (label.innerText.includes('是否繼續播放') || label.innerText.includes('是否繼續觀看'))) {
+            if (btn.getAttribute('aria-expanded') === 'false') {
+                btn.click();
+            }
+        }
+    });
 
-    const options = document.querySelectorAll('.h5p-sc-alternative, .h5p-mc-alternative');
-    options.forEach(option => {
-        const isSelected = option.classList.contains('h5p-sc-selected') || option.getAttribute('aria-checked') === 'true';
-        if (!isSelected) {
-            const text = option.innerText || option.textContent;
-            if (text.includes('是') || text.includes('Yes')) {
+    // 步驟 2：選取通關選項 (點擊「是」)
+    const h5pOptions = document.querySelectorAll('li.h5p-sc-alternative');
+    h5pOptions.forEach(option => {
+        const textEl = option.querySelector('.h5p-sc-label p');
+        if (textEl && textEl.innerText.trim() === '是') {
+            if (option.getAttribute('aria-checked') !== 'true' && !option.classList.contains('h5p-sc-selected')) {
                 option.click();
             }
         }
     });
 
-    const continueBtn = document.querySelector('.h5p-continue-button, .h5p-joubelui-button');
-    if (continueBtn && continueBtn.style.display !== 'none') {
-        continueBtn.click();
-    }
+    // 步驟 3：恢復影片播放 (點擊「繼續」)
+    const continueBtns = document.querySelectorAll('button');
+    continueBtns.forEach(btn => {
+        const btnText = btn.innerText.trim();
+        if (btnText === '繼續' || btnText === 'Continue' || btn.classList.contains('h5p-continue-button') || btn.classList.contains('h5p-joubelui-button')) {
+            // 確保按鈕可見才點擊
+            if (btn.style.display !== 'none') {
+                btn.click();
+            }
+        }
+    });
+    
+    // 步驟 4：(可選功能) 影片自動加速
+    // 預設將影片加速至 16 倍，若要使用可解除註解或由設定開關控制
+    /*
+    const videoElements = document.querySelectorAll('video');
+    videoElements.forEach(video => {
+        if (video.playbackRate !== 16) {
+            video.playbackRate = 16;
+            // 如果影片因為某些原因暫停了，嘗試自動播放
+            if (video.paused && !document.querySelector('.h5p-interaction[role="button"][aria-expanded="true"]')) {
+                video.play().catch(e => console.log('Auto-play prevented by browser', e));
+            }
+        }
+    });
+    */
 }
 
 // 模組二：Moodle 測驗自動作答
