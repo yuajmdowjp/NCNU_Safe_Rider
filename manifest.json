@@ -1,0 +1,21 @@
+{
+  "manifest_version": 3,
+  "name": "NCNU 交通安全測驗小幫手",
+  "version": "1.0",
+  "description": "協助完成 Moodle 交通安全講習影片點擊與測驗提示",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://moodle.ncnu.edu.tw/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["*://moodle.ncnu.edu.tw/*"],
+      "js": ["questions.js", "content.js"],
+      "all_frames": true
+    }
+  ]
+}
