@@ -2,7 +2,7 @@
 console.log("NCNU 交通安全測驗小幫手已載入");
 
 // 預設開啟「自動作答」，讓使用者點擊後才掃描 (此版本已預設開啟且隱藏開關)
-let isAutoEnabled = true; 
+let isAutoEnabled = true;
 // 預設開啟「影片自動輔助」 (此版本已預設開啟且隱藏開關)
 let isVideoAutoEnabled = true;
 
@@ -32,9 +32,9 @@ function injectUI() {
     widget.innerHTML = `
         <div id="ncnu-widget-header" style="position: relative; text-align: center; margin-bottom: 20px; cursor: move; user-select: none; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);" title="按住這裡可以拖曳面板">
             <button id="ncnu-minimize-btn" style="position: absolute; top: -5px; right: -5px; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; transition: background 0.2s; z-index: 2;" title="最小化">-</button>
-            <h1 id="ncnu-widget-title" style="margin: 0; font-size: 20px; font-weight: 700; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; pointer-events: none;">NCNU 安全小幫手</h1>
-            <p id="ncnu-widget-desc" style="margin: 5px 0 0; font-size: 12px; color: #94a3b8; pointer-events: none;">Moodle 自動化輔助工具 (可拖曳)</p>
-            <div id="ncnu-dot-icon" style="display: none; font-size: 24px; pointer-events: none;">🛡️</div>
+            <h1 id="ncnu-widget-title" style="margin: 0; font-size: 20px; font-weight: 700; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; pointer-events: none;">NCNU安全小幫手</h1>
+            <p id="ncnu-widget-desc" style="margin: 5px 0 0; font-size: 12px; color: #94a3b8; pointer-events: none;">Moodle 自動化輔助工具</p>
+            <img id="ncnu-dot-icon" src="${chrome.runtime.getURL('icon.png')}" style="display: none; width: 60px; height: 60px; object-fit: cover; border-radius: 50%; pointer-events: none;" alt="NCNU icon">
         </div>
         <div id="ncnu-widget-body">
             <!-- 設定選項已移除，功能在背景自動執行 -->
@@ -64,7 +64,7 @@ function injectUI() {
 
     function toggleMinimize() {
         isMinimized = !isMinimized;
-        
+
         // 加入轉場動畫
         widget.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
         setTimeout(() => {
@@ -80,25 +80,27 @@ function injectUI() {
             }
             widget.dataset.originalTop = widget.style.top;
             widget.dataset.originalLeft = widget.style.left || (rect.left + 'px');
-            
+
             widgetBody.style.display = 'none';
             widgetTitle.style.display = 'none';
             widgetDesc.style.display = 'none';
             minimizeBtn.style.display = 'none';
             dotIcon.style.display = 'block';
-            
+
             widget.dataset.originalWidth = widget.style.width;
             widget.dataset.originalPadding = widget.style.padding;
             widget.dataset.originalBorderRadius = widget.style.borderRadius;
-            
+
             widget.style.width = '60px';
             widget.style.height = '60px';
             widget.style.padding = '0';
             widget.style.borderRadius = '50%';
+            widget.style.backgroundColor = '#ffffff';
+            widget.style.border = '2px solid #e2e8f0';
             widget.style.display = 'flex';
             widget.style.alignItems = 'center';
             widget.style.justifyContent = 'center';
-            
+
             // 判斷要往左下還是右下縮小
             const centerX = rect.left + (rect.width / 2);
             if (centerX < window.innerWidth / 2) {
@@ -109,7 +111,7 @@ function injectUI() {
                 widget.style.left = (window.innerWidth - 80) + 'px';
             }
             widget.style.top = (window.innerHeight - 80) + 'px';
-            
+
             widgetHeader.style.marginBottom = '0';
             widgetHeader.style.paddingBottom = '0';
             widgetHeader.style.borderBottom = 'none';
@@ -125,19 +127,21 @@ function injectUI() {
             widgetDesc.style.display = 'block';
             minimizeBtn.style.display = 'flex';
             dotIcon.style.display = 'none';
-            
+
             widget.style.width = widget.dataset.originalWidth || '220px';
             widget.style.height = 'auto';
             widget.style.padding = widget.dataset.originalPadding || '20px';
             widget.style.borderRadius = widget.dataset.originalBorderRadius || '12px';
+            widget.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
+            widget.style.border = '1px solid rgba(255,255,255,0.1)';
             widget.style.display = 'block';
-            
+
             // 恢復原本的位置
             if (widget.dataset.originalTop !== undefined && widget.dataset.originalLeft !== undefined) {
                 widget.style.top = widget.dataset.originalTop;
                 widget.style.left = widget.dataset.originalLeft;
             }
-            
+
             widgetHeader.style.marginBottom = '20px';
             widgetHeader.style.paddingBottom = '10px';
             widgetHeader.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
@@ -165,13 +169,13 @@ function injectUI() {
         startMouseX = e.clientX;
         startMouseY = e.clientY;
         const rect = widget.getBoundingClientRect();
-        
+
         // 將定位方式改為 top / left，方便拖曳計算
         if (widget.style.bottom) {
             widget.style.top = rect.top + 'px';
             widget.style.bottom = '';
         }
-        
+
         initialX = e.clientX - rect.left;
         initialY = e.clientY - rect.top;
         header.style.cursor = 'grabbing';
@@ -180,14 +184,14 @@ function injectUI() {
     document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
         e.preventDefault();
-        
+
         if (Math.abs(e.clientX - startMouseX) > 3 || Math.abs(e.clientY - startMouseY) > 3) {
             hasMoved = true;
         }
-        
+
         let currentX = e.clientX - initialX;
         let currentY = e.clientY - initialY;
-        
+
         // 確保不會拖出視窗外
         currentX = Math.max(0, Math.min(currentX, window.innerWidth - widget.offsetWidth));
         currentY = Math.max(0, Math.min(currentY, window.innerHeight - widget.offsetHeight));
@@ -200,7 +204,7 @@ function injectUI() {
         if (!isDragging) return;
         isDragging = false;
         header.style.cursor = 'move';
-        
+
         if (isMinimized && !hasMoved) {
             toggleMinimize();
         }
@@ -217,7 +221,7 @@ function injectUI() {
             if (!confirm('【警告】瞬間通關會直接向 Moodle 伺服器發送完成封包。\n\n若你觀看時間極短，後台記錄可能會判定為異常或作弊。\n確定要執行嗎？')) {
                 return;
             }
-            
+
             const hackText = document.getElementById('ncnu-hack-text');
             hackText.innerText = "正在注入封包...";
             hackBtn.style.opacity = '0.7';
@@ -236,7 +240,7 @@ function injectUI() {
 
             iframes.forEach(iframe => {
                 const doc = iframe.contentDocument || iframe.contentWindow.document;
-                
+
                 // 檢查是否已經注入過
                 if (!doc.getElementById('ncnu-inject-script')) {
                     const script = doc.createElement('script');
@@ -244,7 +248,7 @@ function injectUI() {
                     script.src = chrome.runtime.getURL('inject.js');
                     doc.head.appendChild(script);
                 }
-                
+
                 // 等待一下讓腳本載入後，發送觸發指令
                 setTimeout(() => {
                     iframe.contentWindow.postMessage({ type: 'NCNU_HACK_TRIGGER' }, '*');
@@ -264,7 +268,7 @@ function injectUI() {
                 hackBtn.style.opacity = '1';
                 hackBtn.disabled = false;
             }
-            
+
             // 嘗試自動點擊下一頁
             setTimeout(() => {
                 const nextLink = document.getElementById('next-activity-link') || window.top.document.getElementById('next-activity-link');
@@ -294,11 +298,11 @@ function injectUI() {
         setTimeout(() => {
             handleH5PVideo();
             const stats = handleQuiz();
-            
+
             btnText.innerText = "立即掃描畫面";
             scanBtn.style.opacity = '1';
             scanBtn.disabled = false;
-            
+
             if (stats.totalFound === 0) {
                 resultArea.style.color = "#fcd34d";
                 resultArea.innerText = `掃描完成！但畫面上找不到任何題目。\n(可能是 Moodle 標籤不同或尚未進入測驗)`;
@@ -358,7 +362,7 @@ function handleH5PVideo() {
                 // 如果是特定的 H5P class，或是文字符合
                 const btnText = btn.textContent ? btn.textContent.trim() : '';
                 const isH5PBtn = btn.classList.contains('h5p-joubelui-button') || btn.classList.contains('h5p-continue-button');
-                
+
                 if (isH5PBtn || btnText === '繼續' || btnText === 'Continue') {
                     // 確保按鈕在畫面上可見
                     const rect = btn.getBoundingClientRect();
@@ -385,15 +389,15 @@ function handleH5PVideo() {
             });
 
             // 步驟 5：送出完成後自動點擊下一部影片 (Moodle 導覽)
-            if (doc.body && (doc.body.textContent.includes('Your answers have been submitted!') || 
-                             doc.body.textContent.includes('Your answers have been submitted.') || 
-                             doc.body.textContent.includes('已送出答案') ||
-                             doc.body.textContent.includes('Answers submitted'))) {
-                
+            if (doc.body && (doc.body.textContent.includes('Your answers have been submitted!') ||
+                doc.body.textContent.includes('Your answers have been submitted.') ||
+                doc.body.textContent.includes('已送出答案') ||
+                doc.body.textContent.includes('Answers submitted'))) {
+
                 if (!window._ncnuHelperNextClicked) {
                     window._ncnuHelperNextClicked = true;
                     console.log('[NCNU 小幫手] 偵測到影片已完成，準備跳轉至下一個活動...');
-                    
+
                     try {
                         // 因為文字是在 iframe 中偵測到的，跳轉按鈕則是在最上層的 Moodle 主網頁
                         const topDoc = window.top.document;
@@ -403,7 +407,7 @@ function handleH5PVideo() {
                             nextLink.click();
                             return;
                         }
-                        
+
                         // 備案：如果沒有 ID，尋找包含 ► 的 <a>
                         const nextLinks = topDoc.querySelectorAll('a');
                         for (let a of nextLinks) {
@@ -413,7 +417,7 @@ function handleH5PVideo() {
                                 return;
                             }
                         }
-                    } catch(e) {
+                    } catch (e) {
                         console.log('[NCNU 小幫手] 無法存取主網頁 DOM，退回在當前視窗尋找');
                         const nextLink = document.getElementById('next-activity-link');
                         if (nextLink) nextLink.click();
@@ -451,7 +455,7 @@ function handleH5PVideo() {
             }
         }
     });
-    
+
     // 步驟 4：(可選功能) 影片自動加速
     // 預設將影片加速至 16 倍，若要使用可解除註解或由設定開關控制
     /*
@@ -473,7 +477,7 @@ function handleQuiz() {
     const questions = document.querySelectorAll('.que');
     let stats = { totalFound: questions.length, answered: 0, missed: [] };
     console.log(`[NCNU 小幫手] 畫面上找到 ${questions.length} 個題目區塊 (.que)`);
-    
+
     questions.forEach((que, index) => {
         // 檢查小幫手是否已經處理過這題 (利用提示框是否存在來判斷)
         // 這樣一旦小幫手作答過，就不會再介入，允許使用者手動修改答案而不被覆蓋
@@ -508,7 +512,7 @@ function handleQuiz() {
         if (matchedVariants.length > 0) {
             let matchedData = matchedVariants[0];
             const inputs = Array.from(que.querySelectorAll('input[type="radio"]'));
-            
+
             // 收集該題所有選項的文字 (找 input 所在的父節點文字)
             const optionTexts = inputs.map(input => {
                 const parent = input.parentElement;
@@ -529,7 +533,7 @@ function handleQuiz() {
 
             let targetInput = null;
             const cleanTargetAns = cleanText(matchedData.answer_text);
-            
+
             // 策略 A：用文字精準比對 (可防 Moodle 選項順序打亂，也能精準定位同名題)
             for (let i = 0; i < inputs.length; i++) {
                 const optText = optionTexts[i];
@@ -550,7 +554,7 @@ function handleQuiz() {
             if (targetInput) {
                 stats.answered++;
                 console.log(`[NCNU 小幫手] 第 ${index + 1} 題比對成功！答案選項為 ${matchedData.answer_text}`);
-                
+
                 // 檢查是否已經插入提示，避免重複插入
                 let hint = que.querySelector('.ncnu-helper-hint');
                 if (!hint) {
@@ -564,7 +568,7 @@ function handleQuiz() {
                     hint.style.border = '1px solid #c3e6cb';
                     hint.style.borderRadius = '5px';
                     hint.innerText = `💡 小幫手提示：正確答案是 [ ${matchedData.answer_text || matchedData.answer} ]`;
-                    
+
                     // 將提示插入到題目下方
                     qtextElement.appendChild(hint);
                 }
@@ -593,7 +597,7 @@ setInterval(() => {
     if (isVideoAutoEnabled) {
         handleH5PVideo();
     }
-    
+
     // 測驗題目的自動掃描與答題，依據使用者的開關決定
     if (isAutoEnabled) {
         handleQuiz();

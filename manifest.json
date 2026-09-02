@@ -13,7 +13,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["inject.js"],
+      "resources": ["inject.js", "icon.png"],
       "matches": ["*://moodle.ncnu.edu.tw/*"]
     }
   ],
