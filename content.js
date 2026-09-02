@@ -219,32 +219,41 @@ function injectUI() {
     const resultArea = document.getElementById('ncnu-result-area');
     const btnText = document.getElementById('ncnu-btn-text');
 
-    // 讀取設定
-    chrome.storage.local.get(['autoEnabled', 'videoAutoEnabled'], (result) => {
-        if (result.autoEnabled !== undefined) {
-            isAutoEnabled = result.autoEnabled;
-        }
-        if (result.videoAutoEnabled !== undefined) {
-            isVideoAutoEnabled = result.videoAutoEnabled;
-        } else {
-            // 預設影片輔助開啟
-            isVideoAutoEnabled = true;
-            chrome.storage.local.set({ videoAutoEnabled: true });
-        }
+    // 讀取設定 (加入安全檢查，避免開發/除錯時報錯)
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.get(['autoEnabled', 'videoAutoEnabled'], (result) => {
+            if (result && result.autoEnabled !== undefined) {
+                isAutoEnabled = result.autoEnabled;
+            }
+            if (result && result.videoAutoEnabled !== undefined) {
+                isVideoAutoEnabled = result.videoAutoEnabled;
+            } else {
+                // 預設影片輔助開啟
+                isVideoAutoEnabled = true;
+                chrome.storage.local.set({ videoAutoEnabled: true });
+            }
+            autoToggle.checked = isAutoEnabled;
+            videoToggle.checked = isVideoAutoEnabled;
+        });
+    } else {
         autoToggle.checked = isAutoEnabled;
         videoToggle.checked = isVideoAutoEnabled;
-    });
+    }
 
     // 自動開關切換
     autoToggle.addEventListener('change', (e) => {
         isAutoEnabled = e.target.checked;
-        chrome.storage.local.set({ autoEnabled: isAutoEnabled });
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ autoEnabled: isAutoEnabled });
+        }
         console.log(`自動掃描作答功能已${isAutoEnabled ? '開啟' : '關閉'}`);
     });
 
     videoToggle.addEventListener('change', (e) => {
         isVideoAutoEnabled = e.target.checked;
-        chrome.storage.local.set({ videoAutoEnabled: isVideoAutoEnabled });
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ videoAutoEnabled: isVideoAutoEnabled });
+        }
         console.log(`影片自動輔助功能已${isVideoAutoEnabled ? '開啟' : '關閉'}`);
     });
 
