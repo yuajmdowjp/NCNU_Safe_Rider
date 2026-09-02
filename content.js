@@ -344,6 +344,20 @@ function handleH5PVideo() {
                     }
                 }
             });
+
+            // 步驟 4：影片結束自動提交 (點擊 Submit Answers)
+            const submitBtns = doc.querySelectorAll('button');
+            submitBtns.forEach(btn => {
+                const btnText = btn.textContent ? btn.textContent.trim() : '';
+                if (btnText === 'Submit Answers' || btnText === '提交答案' || btnText === '送出答案') {
+                    const rect = btn.getBoundingClientRect();
+                    const isVisible = rect.width > 0 && rect.height > 0 && btn.style.display !== 'none';
+                    if (isVisible) {
+                        btn.click();
+                        console.log('[NCNU 小幫手] 點擊了影片結束的 Submit Answers 按鈕');
+                    }
+                }
+            });
         } catch (e) {
             // 忽略跨網域 iframe 讀取錯誤
         }
