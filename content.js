@@ -358,6 +358,26 @@ function handleH5PVideo() {
                     }
                 }
             });
+
+            // 步驟 5：送出完成後自動點擊下一部影片 (Moodle 導覽)
+            if (doc.body && (doc.body.textContent.includes('Your answers have been submitted!') || 
+                             doc.body.textContent.includes('Your answers have been submitted.') || 
+                             doc.body.textContent.includes('已送出答案') ||
+                             doc.body.textContent.includes('Answers submitted'))) {
+                
+                if (!window._ncnuHelperNextClicked) {
+                    // Moodle 的「下一個活動」連結通常在主畫面的 <a> 標籤，並包含 ► 符號
+                    const nextLinks = document.querySelectorAll('a');
+                    for (let a of nextLinks) {
+                        if (a.textContent && a.textContent.includes('►')) {
+                            console.log('[NCNU 小幫手] 偵測到影片已完成，自動跳轉至下一個活動：', a.textContent.trim());
+                            window._ncnuHelperNextClicked = true;
+                            a.click();
+                            break;
+                        }
+                    }
+                }
+            }
         } catch (e) {
             // 忽略跨網域 iframe 讀取錯誤
         }
