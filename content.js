@@ -421,11 +421,12 @@ function handleH5PVideo() {
             }
             // 步驟 6：影片自動加速 (實驗性功能)
             if (isVideoSpeedEnabled) {
+                // 原生 HTML5 影片加速
                 const videos = doc.querySelectorAll('video');
                 videos.forEach(video => {
                     if (video.playbackRate !== 16) {
                         video.playbackRate = 16;
-                        console.log('[NCNU 小幫手] 已將影片加速至 16 倍');
+                        console.log('[NCNU 小幫手] 已將 HTML5 影片加速至 16 倍');
                     }
                     // 如果影片因為某些原因暫停了，且畫面上沒有需要點擊的氣泡或選項，嘗試自動播放
                     if (video.paused && !doc.querySelector('.h5p-interaction[role="button"][aria-expanded="true"]') && !doc.querySelector('li.h5p-sc-alternative')) {
@@ -433,6 +434,33 @@ function handleH5PVideo() {
                             // 忽略瀏覽器防止自動播放的錯誤
                         });
                     }
+                });
+
+                // YouTube iframe 加速 (針對 H5P 嵌入 YouTube 影片時)
+                const ytIframes = doc.querySelectorAll('iframe[src*="youtube.com"], iframe[src*="youtube-nocookie.com"]');
+                ytIframes.forEach(iframe => {
+                    if (!iframe.dataset.ncnuSpeedHacked) {
+                        iframe.dataset.ncnuSpeedHacked = "true";
+                        console.log('[NCNU 小幫手] 偵測到 YouTube iframe，發送加速指令...');
+                    }
+                    
+                    try {
+                        // 嘗試發送 YouTube IFrame API 指令加速至 2 倍 (YouTube 官方最高支援 2 倍，部分可支援更高，這裡傳 16 試試)
+                        iframe.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: 'setPlaybackRate',
+                            args: [16]
+                        }), '*');
+                        
+                        // 順便嘗試自動播放，避免卡住
+                        if (!doc.querySelector('.h5p-interaction[role="button"][aria-expanded="true"]') && !doc.querySelector('li.h5p-sc-alternative')) {
+                            iframe.contentWindow.postMessage(JSON.stringify({
+                                event: 'command',
+                                func: 'playVideo',
+                                args: []
+                            }), '*');
+                        }
+                    } catch(e) {}
                 });
             }
         } catch (e) {
