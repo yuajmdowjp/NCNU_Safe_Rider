@@ -17,7 +17,7 @@ function injectUI() {
     widget.style.position = 'fixed';
     widget.style.bottom = '20px';
     widget.style.left = '20px';
-    widget.style.width = '300px';
+    widget.style.width = '220px';
     widget.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
     widget.style.color = '#f8fafc';
     widget.style.padding = '20px';
@@ -43,8 +43,8 @@ function injectUI() {
                 <span id="ncnu-btn-text">立即掃描畫面</span>
             </button>
 
-            <button id="ncnu-hack-btn" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #f97316, #ef4444); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center;" title="危險操作：將會快轉影片至下一個題目的時間點。">
-                <span id="ncnu-hack-text">⏭️ 跳至下一題</span>
+            <button id="ncnu-hack-btn" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #f97316, #ef4444); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center;" title="危險操作：將直接向伺服器發送完成封包，可能會有作弊風險。">
+                <span id="ncnu-hack-text">⚡ 瞬間通關 (發送 xAPI)</span>
             </button>
             
             <div id="ncnu-result-area" style="margin-top: 16px; font-size: 13px; color: #a7f3d0; text-align: center; line-height: 1.5; min-height: 40px;">小幫手已準備就緒！</div>
@@ -126,7 +126,7 @@ function injectUI() {
             minimizeBtn.style.display = 'flex';
             dotIcon.style.display = 'none';
             
-            widget.style.width = widget.dataset.originalWidth || '300px';
+            widget.style.width = widget.dataset.originalWidth || '220px';
             widget.style.height = 'auto';
             widget.style.padding = widget.dataset.originalPadding || '20px';
             widget.style.borderRadius = widget.dataset.originalBorderRadius || '12px';
@@ -214,12 +214,12 @@ function injectUI() {
     const hackBtn = document.getElementById('ncnu-hack-btn');
     if (hackBtn) {
         hackBtn.addEventListener('click', () => {
-            if (!confirm('【警告】這將會跳過影片，直接前往下一個出現題目的時間點。\n\n若你觀看時間極短，後台記錄可能會判定為異常。\n確定要執行嗎？')) {
+            if (!confirm('【警告】瞬間通關會直接向 Moodle 伺服器發送完成封包。\n\n若你觀看時間極短，後台記錄可能會判定為異常或作弊。\n確定要執行嗎？')) {
                 return;
             }
             
             const hackText = document.getElementById('ncnu-hack-text');
-            hackText.innerText = "正在尋找題目...";
+            hackText.innerText = "正在注入封包...";
             hackBtn.style.opacity = '0.7';
             hackBtn.disabled = true;
 
@@ -228,7 +228,7 @@ function injectUI() {
             if (iframes.length === 0) {
                 resultArea.style.color = "#ef4444";
                 resultArea.innerText = "❌ 找不到 H5P 影片模組！";
-                hackText.innerText = "⏭️ 跳至下一題";
+                hackText.innerText = "⚡ 瞬間通關 (發送 xAPI)";
                 hackBtn.style.opacity = '1';
                 hackBtn.disabled = false;
                 return;
@@ -255,40 +255,27 @@ function injectUI() {
 
     // 監聽來自 injected script 的訊息
     window.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'NCNU_JUMP_SUCCESS') {
+        if (event.data && event.data.type === 'NCNU_HACK_SUCCESS') {
             resultArea.style.color = "#10b981";
-            resultArea.innerText = "✅ 成功跳轉至下一題！";
+            resultArea.innerText = "✅ xAPI 封包已成功發送！影片已被標記為完成。";
             const hackText = document.getElementById('ncnu-hack-text');
             if (hackText) {
-                hackText.innerText = "⏭️ 跳至下一題";
+                hackText.innerText = "⚡ 瞬間通關 (發送 xAPI)";
                 hackBtn.style.opacity = '1';
                 hackBtn.disabled = false;
             }
-        } else if (event.data && event.data.type === 'NCNU_JUMP_DONE') {
-            resultArea.style.color = "#3b82f6";
-            resultArea.innerText = "ℹ️ 影片後面已經沒有題目了。";
-            const hackText = document.getElementById('ncnu-hack-text');
-            if (hackText) {
-                hackText.innerText = "⏭️ 跳至下一題";
-                hackBtn.style.opacity = '1';
-                hackBtn.disabled = false;
-            }
+            
+            // 嘗試自動點擊下一頁
+            setTimeout(() => {
+                const nextLink = document.getElementById('next-activity-link') || window.top.document.getElementById('next-activity-link');
+                if (nextLink) nextLink.click();
+            }, 2000);
         } else if (event.data && event.data.type === 'NCNU_HACK_FAIL') {
             resultArea.style.color = "#ef4444";
-            resultArea.innerText = "❌ 跳轉失敗：" + (event.data.error || "未知錯誤");
+            resultArea.innerText = "❌ 封包注入失敗，可能找不到 H5P 實例。";
             const hackText = document.getElementById('ncnu-hack-text');
             if (hackText) {
-                hackText.innerText = "⏭️ 跳至下一題";
-                hackBtn.style.opacity = '1';
-                hackBtn.disabled = false;
-            }
-        } else if (event.data && event.data.type === 'NCNU_HACK_SUCCESS') {
-            // 兼容舊版訊息
-            resultArea.style.color = "#10b981";
-            resultArea.innerText = "✅ xAPI 封包已成功發送！";
-            const hackText = document.getElementById('ncnu-hack-text');
-            if (hackText) {
-                hackText.innerText = "⏭️ 跳至下一題";
+                hackText.innerText = "⚡ 瞬間通關 (發送 xAPI)";
                 hackBtn.style.opacity = '1';
                 hackBtn.disabled = false;
             }
