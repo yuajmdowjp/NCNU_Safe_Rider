@@ -318,6 +318,9 @@ function injectUI() {
             }
         }, 500);
     });
+
+    // 預設為最小化狀態
+    toggleMinimize();
 }
 
 // 確保 DOM 載入後注入 UI
