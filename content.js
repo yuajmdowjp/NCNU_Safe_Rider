@@ -427,7 +427,7 @@ function handleH5PVideo() {
 
             // 步驟 6：影片自動播放與兩倍速
             // 嘗試點擊 H5P 的初始大播放按鈕
-            const playBtns = doc.querySelectorAll('.h5p-video-play, .h5p-splash-play, .h5p-splash-wrapper, [aria-label="Play video"], [aria-label="播放影片"]');
+            const playBtns = doc.querySelectorAll('.h5p-video-play, .h5p-splash-play, .h5p-splash-wrapper, .h5p-play-icon, .h5p-play-button, [aria-label*="Play"], [aria-label*="播放"]');
             playBtns.forEach(btn => {
                 const rect = btn.getBoundingClientRect();
                 const isVisible = rect.width > 0 && rect.height > 0 && btn.style.display !== 'none' && window.getComputedStyle(btn).opacity !== '0';
@@ -450,6 +450,10 @@ function handleH5PVideo() {
 
             const ytIframes = doc.querySelectorAll('iframe[src*="youtube.com"], iframe[src*="youtube-nocookie.com"]');
             ytIframes.forEach(iframe => {
+                if (!iframe.dataset.ncnuSpeedHacked) {
+                    console.log('[NCNU 小幫手] 找到 YouTube iframe，發送兩倍速指令');
+                    iframe.dataset.ncnuSpeedHacked = 'true';
+                }
                 try {
                     iframe.contentWindow.postMessage(JSON.stringify({
                         event: 'command',
