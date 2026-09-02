@@ -54,7 +54,7 @@ function injectUI() {
     document.body.appendChild(widget);
 
     // 最小化功能
-    let isMinimized = false;
+    window.isNcnuMinimized = false;
     const minimizeBtn = document.getElementById('ncnu-minimize-btn');
     const widgetBody = document.getElementById('ncnu-widget-body');
     const widgetHeader = document.getElementById('ncnu-widget-header');
@@ -63,7 +63,7 @@ function injectUI() {
     const dotIcon = document.getElementById('ncnu-dot-icon');
 
     function toggleMinimize() {
-        isMinimized = !isMinimized;
+        window.isNcnuMinimized = !window.isNcnuMinimized;
 
         // 加入轉場動畫
         widget.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -71,7 +71,7 @@ function injectUI() {
             widget.style.transition = '';
         }, 300);
 
-        if (isMinimized) {
+        if (window.isNcnuMinimized) {
             // 紀錄縮小前的位置，並確保改用 top/left 定位以便動畫順暢
             const rect = widget.getBoundingClientRect();
             if (widget.style.bottom) {
@@ -205,7 +205,7 @@ function injectUI() {
         isDragging = false;
         header.style.cursor = 'move';
 
-        if (isMinimized && !hasMoved) {
+        if (window.isNcnuMinimized && !hasMoved) {
             toggleMinimize();
         }
     });
@@ -648,6 +648,11 @@ function handleQuiz() {
 
 // 每 2 秒執行一次非同步掃描
 setInterval(() => {
+    // 若小幫手處於最小化狀態，則暫停背景掃描
+    if (window.isNcnuMinimized) {
+        return;
+    }
+
     // H5P 影片互動泡泡永遠在背景自動偵測點擊，依據使用者的開關決定
     if (isVideoAutoEnabled) {
         handleH5PVideo();
