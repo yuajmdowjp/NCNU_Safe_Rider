@@ -310,32 +310,19 @@ function injectUI() {
 
             iframes.forEach(iframe => {
                 const doc = iframe.contentDocument || iframe.contentWindow.document;
-                const script = doc.createElement('script');
-                script.textContent = `
-                    (function() {
-                        try {
-                            if (window.H5P && window.H5P.instances && window.H5P.instances.length > 0) {
-                                var instance = window.H5P.instances[0];
-                                var xAPIEvent = instance.createXAPIEventTemplate('completed');
-                                if (xAPIEvent && xAPIEvent.data && xAPIEvent.data.statement) {
-                                    xAPIEvent.data.statement.result = {
-                                        completion: true,
-                                        success: true,
-                                        score: { scaled: 1, raw: 1, min: 0, max: 1 }
-                                    };
-                                    instance.trigger(xAPIEvent);
-                                    window.postMessage({ type: 'NCNU_HACK_SUCCESS' }, '*');
-                                }
-                            } else {
-                                window.postMessage({ type: 'NCNU_HACK_FAIL' }, '*');
-                            }
-                        } catch(e) {
-                            window.postMessage({ type: 'NCNU_HACK_FAIL' }, '*');
-                        }
-                    })();
-                `;
-                doc.body.appendChild(script);
-                setTimeout(() => script.remove(), 1000);
+                
+                // 檢查是否已經注入過
+                if (!doc.getElementById('ncnu-inject-script')) {
+                    const script = doc.createElement('script');
+                    script.id = 'ncnu-inject-script';
+                    script.src = chrome.runtime.getURL('inject.js');
+                    doc.head.appendChild(script);
+                }
+                
+                // 等待一下讓腳本載入後，發送觸發指令
+                setTimeout(() => {
+                    iframe.contentWindow.postMessage({ type: 'NCNU_HACK_TRIGGER' }, '*');
+                }, 500);
             });
         });
     }

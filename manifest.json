@@ -11,6 +11,12 @@
   "host_permissions": [
     "*://moodle.ncnu.edu.tw/*"
   ],
+  "web_accessible_resources": [
+    {
+      "resources": ["inject.js"],
+      "matches": ["*://moodle.ncnu.edu.tw/*"]
+    }
+  ],
   "content_scripts": [
     {
       "matches": ["*://moodle.ncnu.edu.tw/*"],
