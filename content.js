@@ -424,6 +424,38 @@ function handleH5PVideo() {
                     }
                 }
             }
+
+            // 步驟 6：影片自動播放與兩倍速
+            const videos = doc.querySelectorAll('video');
+            videos.forEach(video => {
+                if (video.playbackRate !== 2) {
+                    video.playbackRate = 2;
+                    console.log('[NCNU 小幫手] 已將 HTML5 影片加速至 2 倍');
+                }
+                if (video.paused && !doc.querySelector('.h5p-interaction[role="button"][aria-expanded="true"]') && !doc.querySelector('li.h5p-sc-alternative')) {
+                    video.play().catch(e => {});
+                }
+            });
+
+            const ytIframes = doc.querySelectorAll('iframe[src*="youtube.com"], iframe[src*="youtube-nocookie.com"]');
+            ytIframes.forEach(iframe => {
+                try {
+                    iframe.contentWindow.postMessage(JSON.stringify({
+                        event: 'command',
+                        func: 'setPlaybackRate',
+                        args: [2]
+                    }), '*');
+                    
+                    if (!doc.querySelector('.h5p-interaction[role="button"][aria-expanded="true"]') && !doc.querySelector('li.h5p-sc-alternative')) {
+                        iframe.contentWindow.postMessage(JSON.stringify({
+                            event: 'command',
+                            func: 'playVideo',
+                            args: []
+                        }), '*');
+                    }
+                } catch(e) {}
+            });
+
         } catch (e) {
             // 忽略跨網域 iframe 讀取錯誤
         }
