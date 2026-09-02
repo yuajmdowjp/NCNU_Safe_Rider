@@ -426,6 +426,17 @@ function handleH5PVideo() {
             }
 
             // 步驟 6：影片自動播放與兩倍速
+            // 嘗試點擊 H5P 的初始大播放按鈕
+            const playBtns = doc.querySelectorAll('.h5p-video-play, .h5p-splash-play, .h5p-splash-wrapper, [aria-label="Play video"], [aria-label="播放影片"]');
+            playBtns.forEach(btn => {
+                const rect = btn.getBoundingClientRect();
+                const isVisible = rect.width > 0 && rect.height > 0 && btn.style.display !== 'none' && window.getComputedStyle(btn).opacity !== '0';
+                if (isVisible) {
+                    btn.click();
+                    console.log('[NCNU 小幫手] 點擊了 H5P 初始播放按鈕');
+                }
+            });
+
             const videos = doc.querySelectorAll('video');
             videos.forEach(video => {
                 if (video.playbackRate !== 2) {
@@ -487,21 +498,6 @@ function handleH5PVideo() {
             }
         }
     });
-
-    // 步驟 4：(可選功能) 影片自動加速
-    // 預設將影片加速至 16 倍，若要使用可解除註解或由設定開關控制
-    /*
-    const videoElements = document.querySelectorAll('video');
-    videoElements.forEach(video => {
-        if (video.playbackRate !== 16) {
-            video.playbackRate = 16;
-            // 如果影片因為某些原因暫停了，嘗試自動播放
-            if (video.paused && !document.querySelector('.h5p-interaction[role="button"][aria-expanded="true"]')) {
-                video.play().catch(e => console.log('Auto-play prevented by browser', e));
-            }
-        }
-    });
-    */
 }
 
 // 模組二：Moodle 測驗自動作答
