@@ -1,9 +1,9 @@
 // content.js
 console.log("NCNU 交通安全測驗小幫手已載入");
 
-// 預設關閉「自動作答」，讓使用者點擊後才掃描
-let isAutoEnabled = false; 
-// 預設開啟「影片自動輔助」
+// 預設開啟「自動作答」，讓使用者點擊後才掃描 (此版本已預設開啟且隱藏開關)
+let isAutoEnabled = true; 
+// 預設開啟「影片自動輔助」 (此版本已預設開啟且隱藏開關)
 let isVideoAutoEnabled = true;
 
 // 注入懸浮 UI
@@ -36,18 +36,8 @@ function injectUI() {
             <p id="ncnu-widget-desc" style="margin: 5px 0 0; font-size: 12px; color: #94a3b8; pointer-events: none;">Moodle 自動化輔助工具 (可拖曳)</p>
             <div id="ncnu-dot-icon" style="display: none; font-size: 24px; pointer-events: none;">🛡️</div>
         </div>
-        
         <div id="ncnu-widget-body">
-            <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 16px; margin-bottom: 16px; display: flex; flex-direction: column; gap: 12px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 14px; font-weight: 500;">自動掃描與答題</span>
-                    <input type="checkbox" id="ncnu-auto-toggle" style="width: 20px; height: 20px; cursor: pointer;">
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-size: 14px; font-weight: 500;">影片自動輔助 (自動點擊)</span>
-                    <input type="checkbox" id="ncnu-video-toggle" style="width: 20px; height: 20px; cursor: pointer;" checked>
-                </div>
-            </div>
+            <!-- 設定選項已移除，功能在背景自動執行 -->
             
             <button id="ncnu-scan-btn" style="width: 100%; padding: 12px; background: linear-gradient(135deg, #3b82f6, #6366f1); color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; justify-content: center; align-items: center; margin-bottom: 8px;">
                 <span id="ncnu-btn-text">立即掃描畫面</span>
@@ -217,49 +207,9 @@ function injectUI() {
     });
 
     // 綁定按鈕與開關事件
-    const autoToggle = document.getElementById('ncnu-auto-toggle');
-    const videoToggle = document.getElementById('ncnu-video-toggle');
     const scanBtn = document.getElementById('ncnu-scan-btn');
     const resultArea = document.getElementById('ncnu-result-area');
     const btnText = document.getElementById('ncnu-btn-text');
-
-    // 讀取設定 (加入安全檢查，避免開發/除錯時報錯)
-    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.get(['autoEnabled', 'videoAutoEnabled'], (result) => {
-            if (result && result.autoEnabled !== undefined) {
-                isAutoEnabled = result.autoEnabled;
-            }
-            if (result && result.videoAutoEnabled !== undefined) {
-                isVideoAutoEnabled = result.videoAutoEnabled;
-            } else {
-                // 預設影片輔助開啟
-                isVideoAutoEnabled = true;
-                chrome.storage.local.set({ videoAutoEnabled: true });
-            }
-            autoToggle.checked = isAutoEnabled;
-            videoToggle.checked = isVideoAutoEnabled;
-        });
-    } else {
-        autoToggle.checked = isAutoEnabled;
-        videoToggle.checked = isVideoAutoEnabled;
-    }
-
-    // 自動開關切換
-    autoToggle.addEventListener('change', (e) => {
-        isAutoEnabled = e.target.checked;
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.set({ autoEnabled: isAutoEnabled });
-        }
-        console.log(`自動掃描作答功能已${isAutoEnabled ? '開啟' : '關閉'}`);
-    });
-
-    videoToggle.addEventListener('change', (e) => {
-        isVideoAutoEnabled = e.target.checked;
-        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-            chrome.storage.local.set({ videoAutoEnabled: isVideoAutoEnabled });
-        }
-        console.log(`影片自動輔助功能已${isVideoAutoEnabled ? '開啟' : '關閉'}`);
-    });
 
     const hackBtn = document.getElementById('ncnu-hack-btn');
     if (hackBtn) {
