@@ -18,22 +18,22 @@ function injectUI() {
     widget.style.bottom = '20px';
     widget.style.left = '20px';
     widget.style.width = '220px';
-    widget.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-    widget.style.color = '#f8fafc';
+    widget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+    widget.style.color = '#334155';
     widget.style.padding = '20px';
     widget.style.borderRadius = '12px';
-    widget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.5)';
+    widget.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
     widget.style.zIndex = '999999'; // 確保在最上層
     widget.style.fontFamily = 'sans-serif';
     widget.style.backdropFilter = 'blur(10px)';
-    widget.style.border = '1px solid rgba(255,255,255,0.1)';
+    widget.style.border = '1px solid rgba(0,0,0,0.1)';
 
     // 建立 HTML 內容
     widget.innerHTML = `
-        <div id="ncnu-widget-header" style="position: relative; text-align: center; margin-bottom: 20px; cursor: move; user-select: none; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.1);" title="按住這裡可以拖曳面板">
-            <button id="ncnu-minimize-btn" style="position: absolute; top: -5px; right: -5px; background: rgba(255,255,255,0.1); border: none; color: white; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; transition: background 0.2s; z-index: 2;" title="最小化">-</button>
-            <h1 id="ncnu-widget-title" style="margin: 0; font-size: 20px; font-weight: 700; background: linear-gradient(to right, #38bdf8, #818cf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; pointer-events: none;">NCNU安全小幫手</h1>
-            <p id="ncnu-widget-desc" style="margin: 5px 0 0; font-size: 12px; color: #94a3b8; pointer-events: none;">Moodle 自動化輔助工具</p>
+        <div id="ncnu-widget-header" style="position: relative; text-align: center; margin-bottom: 20px; cursor: move; user-select: none; padding-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.1);" title="按住這裡可以拖曳面板">
+            <button id="ncnu-minimize-btn" style="position: absolute; top: -5px; right: -5px; background: rgba(0,0,0,0.05); border: none; color: #64748b; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; transition: background 0.2s; z-index: 2;" title="最小化">-</button>
+            <h1 id="ncnu-widget-title" style="margin: 0; font-size: 20px; font-weight: 700; background: linear-gradient(to right, #2563eb, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; pointer-events: none;">NCNU安全小幫手</h1>
+            <p id="ncnu-widget-desc" style="margin: 5px 0 0; font-size: 12px; color: #64748b; pointer-events: none;">Moodle 自動化輔助工具</p>
             <img id="ncnu-dot-icon" src="${chrome.runtime.getURL('icon.png')}" style="display: none; width: 60px; height: 60px; object-fit: cover; border-radius: 50%; pointer-events: none;" alt="NCNU icon">
         </div>
         <div id="ncnu-widget-body">
@@ -47,7 +47,7 @@ function injectUI() {
                 <span id="ncnu-hack-text">⚡ 瞬間通關 (發送 xAPI)</span>
             </button>
             
-            <div id="ncnu-result-area" style="margin-top: 16px; font-size: 13px; color: #a7f3d0; text-align: center; line-height: 1.5; min-height: 40px;">小幫手已準備就緒！</div>
+            <div id="ncnu-result-area" style="margin-top: 16px; font-size: 13px; color: #059669; text-align: center; line-height: 1.5; min-height: 40px; font-weight: 500;">小幫手已準備就緒！</div>
         </div>
     `;
 
@@ -132,8 +132,8 @@ function injectUI() {
             widget.style.height = 'auto';
             widget.style.padding = widget.dataset.originalPadding || '20px';
             widget.style.borderRadius = widget.dataset.originalBorderRadius || '12px';
-            widget.style.backgroundColor = 'rgba(15, 23, 42, 0.95)';
-            widget.style.border = '1px solid rgba(255,255,255,0.1)';
+            widget.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+            widget.style.border = '1px solid rgba(0,0,0,0.1)';
             widget.style.display = 'block';
 
             // 恢復原本的位置
@@ -144,7 +144,7 @@ function injectUI() {
 
             widgetHeader.style.marginBottom = '20px';
             widgetHeader.style.paddingBottom = '10px';
-            widgetHeader.style.borderBottom = '1px solid rgba(255,255,255,0.1)';
+            widgetHeader.style.borderBottom = '1px solid rgba(0,0,0,0.1)';
             widgetHeader.style.display = 'block';
             widgetHeader.title = "按住這裡可以拖曳面板";
         }
